@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RML CREATION — Professional Document Portal</title>
+    
+    <!-- PWA & Favicon Links (Update href with your logo image files) -->
+    <link rel="icon" type="image/png" href="RMLC.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#dc2626">
+
     <!-- PDF.js for accurate client-side PDF page counting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- JSZip to read internal Microsoft Word (.docx) metadata and word counts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
@@ -57,6 +65,14 @@
             margin-bottom: 32px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 20px;
+        }
+
+        .brand-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            border-radius: 12px;
         }
 
         .brand-header h1 {
@@ -327,8 +343,10 @@
 <body>
 
     <div class="portal-container">
-        <!-- Branding -->
+        <!-- Branding Header with Logo -->
         <div class="brand-header">
+            <!-- Replace 'logo.png' with your logo file name or URL -->
+            <img src="logo.png" alt="RML Logo" class="brand-logo" onerror="this.style.display='none'">
             <h1>RML <span>CREATION</span></h1>
             <p>Professional Document Printing, Scanning & File Service Portal</p>
         </div>
@@ -339,12 +357,12 @@
                 <div class="section-title">Client Information <span class="badge">Required</span></div>
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="clientName">Client or Company Name *</label>
-                        <input type="text" id="clientName" required placeholder="Enter full name or business title">
+                        <label for="clientName">NAME *</label>
+                        <input type="text" id="clientName" required placeholder="Enter full name">
                     </div>
                     <div class="form-group">
                         <label for="clientContact">Contact Number / Email (Optional)</label>
-                        <input type="text" id="clientContact" placeholder="e.g., 09123456789 or email@domain.com">
+                        <input type="text" id="clientContact" placeholder="e.g., 09123456789 or xyz@gmail.com.com">
                     </div>
                 </div>
             </div>
@@ -385,11 +403,11 @@
                     <span id="summaryDocCount">0</span>
                 </div>
                 <div class="summary-row">
-                    <span>Total PDF Pages Counted:</span>
-                    <span id="summaryPdfPages">0 pages</span>
+                    <span>Total Counted Pages (PDF + Word):</span>
+                    <span id="summaryTotalPages">0 pages</span>
                 </div>
                 <div class="summary-row">
-                    <span>Rate per PDF Page:</span>
+                    <span>Rate per Page:</span>
                     <span>₱2.00</span>
                 </div>
                 <div class="summary-row total">
@@ -399,7 +417,7 @@
             </div>
 
             <!-- Submit Button & Progress -->
-            <button type="submit" id="submitBtn" class="btn-primary">Confirm and Upload to Google Drive</button>
+            <button type="submit" id="submitBtn" class="btn-primary">Confirm Transaction</button>
             
             <div class="progress-container" id="progressContainer">
                 <div class="progress-bar-bg">
@@ -419,7 +437,7 @@
 
         let selectedImages = [];
         let selectedDocs = [];
-        let totalPdfPageCount = 0;
+        let totalPageCount = 0;
 
         // DOM Elements
         const imageDropzone = document.getElementById('imageDropzone');
@@ -432,7 +450,7 @@
 
         const summaryImageCount = document.getElementById('summaryImageCount');
         const summaryDocCount = document.getElementById('summaryDocCount');
-        const summaryPdfPages = document.getElementById('summaryPdfPages');
+        const summaryTotalPages = document.getElementById('summaryTotalPages');
         const summaryTotalPrice = document.getElementById('summaryTotalPrice');
         
         const submitBtn = document.getElementById('submitBtn');
@@ -470,9 +488,15 @@
                     selectedImages.push(file);
                 } else {
                     selectedDocs.push(file);
-                    // If PDF, count pages using PDF.js
-                    if (file.type === 'pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                    // Check file format and compute page counts dynamically
+                    const fileName = file.name.toLowerCase();
+                    if (fileName.endsWith('.pdf')) {
                         await countPdfPages(file);
+                    } else if (fileName.endsWith('.docx')) {
+                        await countDocxPages(file);
+                    } else {
+                        // Default fallback for other file formats (e.g. txt, xlsx) = 1 page minimum
+                        totalPageCount += 1;
                     }
                 }
             }
@@ -484,10 +508,52 @@
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                totalPdfPageCount += pdf.numPages;
+                file._calculatedPages = pdf.numPages;
+                totalPageCount += pdf.numPages;
             } catch (err) {
                 console.error("Error reading PDF pages:", err);
-                alert(`Could not read page count for ${file.name}. It may be password-protected or corrupted.`);
+                file._calculatedPages = 1;
+                totalPageCount += 1;
+            }
+        }
+
+        async function countDocxPages(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const zip = new JSZip();
+                const zipContent = await zip.loadAsync(arrayBuffer);
+                
+                let docPages = 0;
+
+                // Method 1: Read saved MS Word metadata from docProps/app.xml
+                if (zipContent.files["docProps/app.xml"]) {
+                    const appXmlText = await zipContent.files["docProps/app.xml"].async("text");
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(appXmlText, "text/xml");
+                    const pagesNode = xmlDoc.getElementsByTagName("Pages")[0];
+                    if (pagesNode && pagesNode.textContent) {
+                        docPages = parseInt(pagesNode.textContent, 10) || 0;
+                    }
+                }
+
+                // Method 2: Fallback estimation via word count if metadata is missing (~250 words per page)
+                if (docPages <= 0 && zipContent.files["word/document.xml"]) {
+                    const docXmlText = await zipContent.files["word/document.xml"].async("text");
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(docXmlText, "text/xml");
+                    const textContent = xmlDoc.textContent || "";
+                    const wordCount = textContent.trim().split(/\s+/).length;
+                    docPages = Math.max(1, Math.ceil(wordCount / 250));
+                }
+
+                if (docPages <= 0) docPages = 1; // Absolute minimum fallback
+
+                file._calculatedPages = docPages;
+                totalPageCount += docPages;
+            } catch (err) {
+                console.error("Error reading DOCX pages:", err);
+                file._calculatedPages = 1;
+                totalPageCount += 1;
             }
         }
 
@@ -508,11 +574,12 @@
         function createFileItemElement(file, index, type) {
             const div = document.createElement('div');
             div.className = 'file-item';
+            const pageBadge = file._calculatedPages ? ` | ${file._calculatedPages} page(s)` : '';
             div.innerHTML = `
                 <div class="file-info">
                     <div>
                         <div class="file-name">${escapeHtml(file.name)}</div>
-                        <div class="file-meta">${(file.size / (1024*1024)).toFixed(2)} MB</div>
+                        <div class="file-meta">${(file.size / (1024*1024)).toFixed(2)} MB${pageBadge}</div>
                     </div>
                 </div>
                 <button type="button" class="remove-file" title="Remove">&times;</button>
@@ -521,8 +588,12 @@
                 if (type === 'image') {
                     selectedImages.splice(index, 1);
                 } else {
-                    selectedDocs.splice(index, 1);
-                    recalculatePdfPages();
+                    const removed = selectedDocs.splice(index, 1)[0];
+                    if (removed && removed._calculatedPages) {
+                        totalPageCount -= removed._calculatedPages;
+                    } else {
+                        totalPageCount -= 1;
+                    }
                 }
                 renderFileList();
                 updateSummary();
@@ -530,25 +601,11 @@
             return div;
         }
 
-        async function recalculatePdfPages() {
-            totalPdfPageCount = 0;
-            for (let file of selectedDocs) {
-                if (file.name.toLowerCase().endsWith('.pdf')) {
-                    try {
-                        const arrayBuffer = await file.arrayBuffer();
-                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                        totalPdfPageCount += pdf.numPages;
-                    } catch(e) {}
-                }
-            }
-            updateSummary();
-        }
-
         function updateSummary() {
             summaryImageCount.textContent = selectedImages.length;
             summaryDocCount.textContent = selectedDocs.length;
-            summaryPdfPages.textContent = totalPdfPageCount + " pages";
-            const totalPrice = totalPdfPageCount * 2.00;
+            summaryTotalPages.textContent = totalPageCount + " pages";
+            const totalPrice = totalPageCount * 2.00;
             summaryTotalPrice.textContent = "₱" + totalPrice.toFixed(2);
         }
 
@@ -574,7 +631,6 @@
                 return;
             }
 
-            // Fixed validation check
             if (WEB_APP_URL === "YOUR_DEPLOYED_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
                 alert("Please configure your deployed Google Apps Script Web App URL in the JavaScript code.");
                 return;
@@ -587,7 +643,6 @@
             progressBarFill.style.width = "10%";
 
             try {
-                // Convert files to base64 payload safely
                 const filePayloads = [];
                 for (let i = 0; i < allFiles.length; i++) {
                     const file = allFiles[i];
@@ -604,33 +659,32 @@
                 const payload = {
                     clientName: clientName,
                     clientContact: clientContact,
-                    pdfPages: totalPdfPageCount,
-                    estimatedPrice: totalPdfPageCount * 2.00,
+                    pdfPages: totalPageCount,
+                    estimatedPrice: totalPageCount * 2.00,
                     files: filePayloads
                 };
 
-                progressText.textContent = "Sending data to Google Drive backend...";
+                progressText.textContent = "Processing...";
                 progressBarFill.style.width = "60%";
 
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Avoids preflight CORS issues in GAS
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
 
                 progressBarFill.style.width = "90%";
                 const result = await response.json();
 
-                if (result.status === 'success') {
+                    if (result.status === 'success') {
                     progressBarFill.style.width = "100%";
                     statusMessage.className = "success-msg";
-                    statusMessage.textContent = `Upload successful! ${allFiles.length} file(s) saved to Google Drive. Total Estimated Price: ₱${(totalPdfPageCount * 2.00).toFixed(2)}`;
+                    statusMessage.textContent = `Transaction's successful! ${allFiles.length} file(s) Please pay the amount upon receiving. Total Estimated Price: ₱${(totalPageCount * 2.00).toFixed(2)}`;
                     
-                    // Reset form
                     document.getElementById('uploadPortalForm').reset();
                     selectedImages = [];
                     selectedDocs = [];
-                    totalPdfPageCount = 0;
+                    totalPageCount = 0;
                     renderFileList();
                     updateSummary();
                 } else {
