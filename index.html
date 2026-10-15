@@ -3,8 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Client File Uploader</title>
+    <title>RML CREATION — Professional Document Portal</title>
+    <!-- PDF.js for accurate client-side PDF page counting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <style>
+        :root {
+            --bg-deep: #0a0e17;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --border-color: rgba(239, 68, 68, 0.2);
+            --accent-red: #dc2626;
+            --accent-red-hover: #b91c1c;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,8 +30,8 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f172a, #1e1b4b);
-            color: #f8fafc;
+            background: linear-gradient(135deg, var(--bg-deep), #111827);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,196 +39,622 @@
             padding: 20px;
         }
 
-        .upload-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 30px;
+        .portal-container {
             width: 100%;
-            max-width: 480px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
 
-        h2 {
-            margin-bottom: 8px;
-            font-size: 1.5rem;
+        /* Branding Header */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 20px;
+        }
+
+        .brand-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
             color: #ffffff;
+            margin-bottom: 6px;
         }
 
-        p.subtitle {
-            color: #94a3b8;
-            font-size: 0.9rem;
+        .brand-header h1 span {
+            color: var(--accent-red);
+        }
+
+        .brand-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Form Sections & Cards */
+        .section-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 24px;
             margin-bottom: 24px;
         }
 
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title span.badge {
+            background: var(--accent-red);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .portal-container {
+                padding: 20px;
+            }
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
         }
 
         label {
             display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
             color: #cbd5e1;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        input[type="text"], input[type="file"] {
+        input[type="text"], input[type="tel"], input[type="email"] {
             width: 100%;
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 14px;
+            background: rgba(10, 14, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 8px;
             color: #fff;
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
-        input[type="text"]:focus, input[type="file"]:focus {
-            border-color: #3b82f6;
+        input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
         }
 
-        input[type="file"] {
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button:disabled {
-            background: #475569;
-            cursor: not-allowed;
-        }
-
-        #status {
-            margin-top: 16px;
+        /* Dropzones */
+        .dropzone {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 24px;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(10, 14, 23, 0.4);
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-red);
+            background: rgba(220, 38, 38, 0.04);
+        }
+
+        .dropzone p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .dropzone input[type="file"] {
+            display: none;
+        }
+
+        /* File Lists & Previews */
+        .file-list {
+            margin-top: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-name {
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+
+        .file-meta {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--error);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .remove-file:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Summary / Pricing Card */
+        .summary-card {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
             font-size: 0.9rem;
         }
 
-        .success { color: #4ade80; }
-        .error { color: #f87171; }
-        .loading { color: #60a5fa; }
+        .summary-row.total {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 12px;
+            padding-top: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .summary-row.total span:last-child {
+            color: #4ade80;
+        }
+
+        /* Action Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-red);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-red-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            background: #475569;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar & Status */
+        .progress-container {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-red);
+            transition: width 0.3s ease;
+        }
+
+        #statusMessage {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .success-msg { color: var(--success); }
+        .error-msg { color: var(--error); }
+        .info-msg { color: #60a5fa; }
     </style>
 </head>
 <body>
 
-    <div class="upload-card">
-        <h2>Client File Portal</h2>
-        <p class="subtitle">Upload your pictures, documents, and project assets securely.</p>
-        
-        <form id="uploadForm">
-            <div class="form-group">
-                <label for="clientName">Your Name / Company</label>
-                <input type="text" id="clientName" required placeholder="Enter your name">
+    <div class="portal-container">
+        <!-- Branding -->
+        <div class="brand-header">
+            <h1>RML <span>CREATION</span></h1>
+            <p>Professional Document Printing, Scanning & File Service Portal</p>
+        </div>
+
+        <form id="uploadPortalForm">
+            <!-- Client Information -->
+            <div class="section-card">
+                <div class="section-title">Client Information <span class="badge">Required</span></div>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="clientName">Client or Company Name *</label>
+                        <input type="text" id="clientName" required placeholder="Enter full name or business title">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientContact">Contact Number / Email (Optional)</label>
+                        <input type="text" id="clientContact" placeholder="e.g., 09123456789 or email@domain.com">
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="fileField">Select File (Images, PDFs, Zips, etc.)</label>
-                <input type="file" id="fileField" required>
+            <!-- Image Upload Section -->
+            <div class="section-card">
+                <div class="section-title">A. Image Upload <span class="badge">Optional</span></div>
+                <div class="dropzone" id="imageDropzone">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color: var(--accent-red); margin: 0 auto;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                    <p><strong>Drag & drop images here</strong> or click to browse</p>
+                    <p style="font-size: 0.75rem; margin-top: 4px;">Supports JPG, JPEG, PNG, WEBP (Max 50MB per file)</p>
+                    <input type="file" id="imageInput" multiple accept="image/jpeg,image/png,image/webp,image/jpg">
+                </div>
+                <div class="file-list" id="imageList"></div>
             </div>
 
-            <button type="submit" id="submitBtn">Upload to Google Drive</button>
+            <!-- Document Upload Section -->
+            <div class="section-card">
+                <div class="section-title">B. Document & File Upload <span class="badge">PDF / Office / Zip</span></div>
+                <div class="dropzone" id="docDropzone">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color: var(--accent-red); margin: 0 auto;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                    <p><strong>Drag & drop documents here</strong> or click to browse</p>
+                    <p style="font-size: 0.75rem; margin-top: 4px;">Supports PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, ZIP (Max 50MB)</p>
+                    <input type="file" id="docInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
+                </div>
+                <div class="file-list" id="docList"></div>
+            </div>
+
+            <!-- Pricing & Summary Card -->
+            <div class="summary-card">
+                <div class="section-title" style="margin-bottom: 12px; font-size: 1rem;">Order & Pricing Summary</div>
+                <div class="summary-row">
+                    <span>Selected Images:</span>
+                    <span id="summaryImageCount">0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Selected Documents:</span>
+                    <span id="summaryDocCount">0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Total PDF Pages Counted:</span>
+                    <span id="summaryPdfPages">0 pages</span>
+                </div>
+                <div class="summary-row">
+                    <span>Rate per PDF Page:</span>
+                    <span>₱2.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Estimated Total Price:</span>
+                    <span id="summaryTotalPrice">₱0.00</span>
+                </div>
+            </div>
+
+            <!-- Submit Button & Progress -->
+            <button type="submit" id="submitBtn" class="btn-primary">Confirm and Upload to Google Drive</button>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                <p id="progressText" style="font-size: 0.8rem; text-align: center; color: var(--text-muted);">Preparing files...</p>
+            </div>
+
+            <div id="statusMessage"></div>
         </form>
-
-        <div id="status"></div>
     </div>
 
     <script>
-        // REPLACE WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
-        const WEB_APP_URL = "https://script.google.com/macros/library/d/1WoupJ8_HaikEn6s0zf1DRH8p-evO9R3vSl8HJCGZwVdPIVwXK4cbixp_/4";
+        // CONFIGURATION: Replace with your deployed Google Apps Script Web App URL
+        const WEB_APP_URL = "YOUR_DEPLOYED_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+        const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB limit
 
-        const form = document.getElementById('uploadForm');
+        let selectedImages = [];
+        let selectedDocs = [];
+        let totalPdfPageCount = 0;
+
+        // DOM Elements
+        const imageDropzone = document.getElementById('imageDropzone');
+        const imageInput = document.getElementById('imageInput');
+        const imageList = document.getElementById('imageList');
+        
+        const docDropzone = document.getElementById('docDropzone');
+        const docInput = document.getElementById('docInput');
+        const docList = document.getElementById('docList');
+
+        const summaryImageCount = document.getElementById('summaryImageCount');
+        const summaryDocCount = document.getElementById('summaryDocCount');
+        const summaryPdfPages = document.getElementById('summaryPdfPages');
+        const summaryTotalPrice = document.getElementById('summaryTotalPrice');
+        
         const submitBtn = document.getElementById('submitBtn');
-        const statusDiv = document.getElementById('status');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const progressText = document.getElementById('progressText');
+        const statusMessage = document.getElementById('statusMessage');
 
-        form.addEventListener('submit', function(e) {
+        // Dropzone interactions
+        setupDropzone(imageDropzone, imageInput, (files) => handleFiles(files, 'image'));
+        setupDropzone(docDropzone, docInput, (files) => handleFiles(files, 'doc'));
+
+        function setupDropzone(dropzone, input, callback) {
+            dropzone.addEventListener('click', () => input.click());
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) callback(e.dataTransfer.files);
+            });
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length) callback(e.target.files);
+            });
+        }
+
+        async function handleFiles(files, type) {
+            for (let file of files) {
+                if (file.size > MAX_FILE_SIZE) {
+                    alert(`File "${file.name}" exceeds the 50MB limit and was skipped.`);
+                    continue;
+                }
+
+                if (type === 'image') {
+                    selectedImages.push(file);
+                } else {
+                    selectedDocs.push(file);
+                    // If PDF, count pages using PDF.js
+                    if (file.type === 'pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                        await countPdfPages(file);
+                    }
+                }
+            }
+            renderFileList();
+            updateSummary();
+        }
+
+        async function countPdfPages(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                totalPdfPageCount += pdf.numPages;
+            } catch (err) {
+                console.error("Error reading PDF pages:", err);
+                alert(`Could not read page count for ${file.name}. It may be password-protected or corrupted.`);
+            }
+        }
+
+        function renderFileList() {
+            // Render Images
+            imageList.innerHTML = '';
+            selectedImages.forEach((file, index) => {
+                imageList.appendChild(createFileItemElement(file, index, 'image'));
+            });
+
+            // Render Docs
+            docList.innerHTML = '';
+            selectedDocs.forEach((file, index) => {
+                docList.appendChild(createFileItemElement(file, index, 'doc'));
+            });
+        }
+
+        function createFileItemElement(file, index, type) {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <div class="file-info">
+                    <div>
+                        <div class="file-name">${escapeHtml(file.name)}</div>
+                        <div class="file-meta">${(file.size / (1024*1024)).toFixed(2)} MB</div>
+                    </div>
+                </div>
+                <button type="button" class="remove-file" title="Remove">&times;</button>
+            `;
+            div.querySelector('.remove-file').addEventListener('click', () => {
+                if (type === 'image') {
+                    selectedImages.splice(index, 1);
+                } else {
+                    // Recalculate or approximate removal (simpler: recalculate all PDFs)
+                    selectedDocs.splice(index, 1);
+                    recalculatePdfPages();
+                }
+                renderFileList();
+                updateSummary();
+            });
+            return div;
+        }
+
+        async function recalculatePdfPages() {
+            totalPdfPageCount = 0;
+            for (let file of selectedDocs) {
+                if (file.name.toLowerCase().endsWith('.pdf')) {
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                        totalPdfPageCount += pdf.numPages;
+                    } catch(e) {}
+                }
+            }
+            updateSummary();
+        }
+
+        function updateSummary() {
+            summaryImageCount.textContent = selectedImages.length;
+            summaryDocCount.textContent = selectedDocs.length;
+            summaryPdfPages.textContent = totalPdfPageCount + " pages";
+            const totalPrice = totalPdfPageCount * 2.00;
+            summaryTotalPrice.textContent = "₱" + totalPrice.toFixed(2);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Form Submission
+        document.getElementById('uploadPortalForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const clientName = document.getElementById('clientName').value.trim();
-            const fileInput = document.getElementById('fileField');
-            const file = fileInput.files[0];
+            const clientContact = document.getElementById('clientContact').value.trim();
+            const allFiles = [...selectedImages, ...selectedDocs];
 
-            if (!file) return;
+            if (!clientName) {
+                alert("Please enter your client or company name.");
+                return;
+            }
 
-            // Optional: Limit file size check (e.g., max 25MB due to Apps Script limits)
-            if (file.size > 25 * 1024 * 1024) {
-                statusDiv.className = "error";
-                statusDiv.textContent = "File is too large! Max file size is 25MB.";
+            if (allFiles.length === 0) {
+                alert("Please select at least one image or document to upload.");
+                return;
+            }
+
+            if (WEB_APP_URL === "https://script.google.com/macros/s/AKfycbzHcTJSSMIKwNlabLCLipem-OZbgBDosN2IZpKlLX_0GxLrbECAZP3id9NO9hjfP37fIA/exec") {
+                alert("Please configure your deployed Google Apps Script Web App URL in the JavaScript code.");
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "Uploading...";
-            statusDiv.className = "loading";
-            statusDiv.textContent = "Processing and sending file to Google Drive...";
+            progressContainer.style.display = 'block';
+            statusMessage.className = "info-msg";
+            statusMessage.textContent = "Encoding files and preparing upload...";
+            progressBarFill.style.width = "10%";
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function () {
+            try {
+                // Convert files to base64 payload safely
+                const filePayloads = [];
+                for (let i = 0; i < allFiles.length; i++) {
+                    const file = allFiles[i];
+                    progressText.textContent = `Processing file ${i+1} of ${allFiles.length}: ${file.name}`;
+                    const base64Data = await readFileAsBase64(file);
+                    filePayloads.push({
+                        fileName: file.name,
+                        mimeType: file.type || 'application/octet-stream',
+                        fileData: base64Data
+                    });
+                    progressBarFill.style.width = `${10 + Math.floor((i+1)/allFiles.length * 40)}%`;
+                }
+
                 const payload = {
                     clientName: clientName,
-                    fileName: file.name,
-                    mimeType: file.type,
-                    fileData: reader.result
+                    clientContact: clientContact,
+                    pdfPages: totalPdfPageCount,
+                    estimatedPrice: totalPdfPageCount * 2.00,
+                    files: filePayloads
                 };
 
-                fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Apps Script requires no-cors mode for standard web fetch
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                })
-                .then(() => {
-                    statusDiv.className = "success";
-                    statusDiv.textContent = "File uploaded successfully!";
-                    form.reset();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    statusDiv.className = "error";
-                    statusDiv.textContent = "Upload failed. Please try again.";
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Upload to Google Drive";
-                });
-            };
+                progressText.textContent = "Sending data to Google Drive backend...";
+                progressBarFill.style.width = "60%";
 
-            reader.onerror = function (error) {
-                console.error('Error reading file:', error);
-                statusDiv.className = "error";
-                statusDiv.textContent = "Error reading file.";
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Avoids preflight CORS issues in GAS
+                    body: JSON.stringify(payload)
+                });
+
+                progressBarFill.style.width = "90%";
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    progressBarFill.style.width = "100%";
+                    statusMessage.className = "success-msg";
+                    statusMessage.textContent = `Upload successful! ${allFiles.length} file(s) saved to Google Drive. Total Estimated Price: ₱${(totalPdfPageCount * 2.00).toFixed(2)}`;
+                    
+                    // Reset form
+                    document.getElementById('uploadPortalForm').reset();
+                    selectedImages = [];
+                    selectedDocs = [];
+                    totalPdfPageCount = 0;
+                    renderFileList();
+                    updateSummary();
+                } else {
+                    throw new Error(result.message || "Unknown backend error");
+                }
+
+            } catch (error) {
+                console.error("Upload error:", error);
+                statusMessage.className = "error-msg";
+                statusMessage.textContent = "Upload failed: " + error.message;
+            } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Upload to Google Drive";
-            };
+                progressText.textContent = "Complete.";
+            }
         });
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
     </script>
 </body>
 </html>
