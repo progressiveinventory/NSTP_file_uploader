@@ -413,8 +413,8 @@
     </div>
 
     <script>
-        // CONFIGURATION: Replace with your deployed Google Apps Script Web App URL
-        const WEB_APP_URL = "YOUR_DEPLOYED_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+        // CONFIGURATION: Deployed Google Apps Script Web App URL
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyqAEyaj8qZtLQkECwpCW_EqFBzZW-nVNy2TqQ8TKId6MNsCuJxYihRrp7Lh2q_mwmxkQ/exec";
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB limit
 
         let selectedImages = [];
@@ -521,7 +521,6 @@
                 if (type === 'image') {
                     selectedImages.splice(index, 1);
                 } else {
-                    // Recalculate or approximate removal (simpler: recalculate all PDFs)
                     selectedDocs.splice(index, 1);
                     recalculatePdfPages();
                 }
@@ -575,7 +574,8 @@
                 return;
             }
 
-            if (WEB_APP_URL === "https://script.google.com/macros/s/AKfycbyqAEyaj8qZtLQkECwpCW_EqFBzZW-nVNy2TqQ8TKId6MNsCuJxYihRrp7Lh2q_mwmxkQ/exec") {
+            // Fixed validation check
+            if (WEB_APP_URL === "YOUR_DEPLOYED_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
                 alert("Please configure your deployed Google Apps Script Web App URL in the JavaScript code.");
                 return;
             }
