@@ -1,20 +1,42 @@
 {
+  "id": "/?source=pwa",
   "name": "RML Creation",
   "short_name": "RMLC",
-  "start_url": "index.html",
+  "description": "Professional document printing, scanning, and file service portal by RML Creation.",
+  "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0a0e17",
   "theme_color": "#dc2626",
   "icons": [
     {
       "src": "RMLC.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "RMLC.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "RMLC.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "RML Creation Portal Mobile View"
+    },
+    {
+      "src": "RMLC.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "RML Creation Portal Desktop View"
     }
   ]
 }
