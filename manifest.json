@@ -33,7 +33,7 @@
     },
     {
       "src": "RMLC.png",
-      "sizes": "1280x800",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
       "label": "RML Creation Portal Desktop View"
