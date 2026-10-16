@@ -162,8 +162,8 @@
             .brand-header h1 {
                 font-size: 1.8rem;
             }
-            input[type="text"], input[type="tel"], input[type="email"] {
-                font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
+            input[type="text"], input[type="tel"], input[type="email"], textarea {
+                font-size: 16px !important; /* Prevents iOS/Android Safari auto-zoom */
             }
         }
 
@@ -185,7 +185,7 @@
             letter-spacing: 0.8px;
         }
 
-        input[type="text"], input[type="tel"], input[type="email"] {
+        input[type="text"], input[type="tel"], input[type="email"], textarea {
             width: 100%;
             padding: 12px 14px;
             background: rgba(10, 14, 23, 0.9);
@@ -198,9 +198,14 @@
             transition: all 0.2s;
         }
 
-        input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus {
+        input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus, textarea:focus {
             border-color: var(--accent-red);
             box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
         /* Dropzones */
@@ -481,6 +486,10 @@
                     <span>Rate per Page:</span>
                     <span>₱2.00</span>
                 </div>
+                <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+                    <label for="clientNotes">Special Instructions / Notes (Optional)</label>
+                    <textarea id="clientNotes" placeholder="e.g., Colored print, back-to-back, ring bind, etc."></textarea>
+                </div>
                 <div class="summary-row total">
                     <span>Estimated Total Price:</span>
                     <span id="summaryTotalPrice">₱0.00</span>
@@ -523,6 +532,7 @@
         const summaryDocCount = document.getElementById('summaryDocCount');
         const summaryTotalPages = document.getElementById('summaryTotalPages');
         const summaryTotalPrice = document.getElementById('summaryTotalPrice');
+        const clientNotesInput = document.getElementById('clientNotes');
         
         const submitBtn = document.getElementById('submitBtn');
         const progressContainer = document.getElementById('progressContainer');
@@ -684,6 +694,7 @@
 
             const clientName = document.getElementById('clientName').value.trim();
             const clientContact = document.getElementById('clientContact').value.trim();
+            const clientNotes = clientNotesInput.value.trim();
             const allFiles = [...selectedImages, ...selectedDocs];
 
             if (!clientName) {
@@ -724,12 +735,13 @@
                 const payload = {
                     clientName: clientName,
                     clientContact: clientContact,
+                    clientNotes: clientNotes,
                     pdfPages: totalPageCount,
                     estimatedPrice: totalPageCount * 2.00,
                     files: filePayloads
                 };
 
-                progressText.textContent = "Processing...";
+                progressText.textContent = "Sending to server...";
                 progressBarFill.style.width = "60%";
 
                 const response = await fetch(WEB_APP_URL, {
@@ -739,9 +751,18 @@
                 });
 
                 progressBarFill.style.width = "90%";
-                const result = await response.json();
+                
+                // Robust response handling for Android / mobile webviews preventing 'undefined' errors
+                const responseText = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseErr) {
+                    console.error("Raw response:", responseText);
+                    throw new Error("Server returned an invalid response format.");
+                }
 
-                if (result.status === 'success') {
+                if (result && result.status === 'success') {
                     progressBarFill.style.width = "100%";
                     statusMessage.className = "success-msg";
                     statusMessage.textContent = `Transaction successful! ${allFiles.length} file(s) uploaded. Please pay the amount upon receiving. Total: ₱${(totalPageCount * 2.00).toFixed(2)}`;
@@ -753,7 +774,7 @@
                     renderFileList();
                     updateSummary();
                 } else {
-                    throw new Error(result.message || "Unknown backend error");
+                    throw new Error((result && result.message) || "Unknown backend error");
                 }
 
             } catch (error) {
