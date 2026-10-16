@@ -2,10 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RML CREATION — Professional Document Portal</title>
     
-    <!-- PWA & Favicon Links (Update href with your logo image files) -->
+    <!-- Google Fonts: Manrope & Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+
+    <!-- PWA & Favicon Links -->
     <link rel="icon" type="image/png" href="RMLC.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#dc2626">
@@ -20,8 +25,8 @@
     <style>
         :root {
             --bg-deep: #0a0e17;
-            --bg-card: rgba(18, 24, 38, 0.85);
-            --border-color: rgba(239, 68, 68, 0.2);
+            --bg-card: rgba(18, 24, 38, 0.90);
+            --border-color: rgba(239, 68, 68, 0.25);
             --accent-red: #dc2626;
             --accent-red-hover: #b91c1c;
             --text-main: #f8fafc;
@@ -34,7 +39,8 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -44,7 +50,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
         }
 
         .portal-container {
@@ -55,29 +61,43 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 40px;
+            padding: 36px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
 
         /* Branding Header */
         .brand-header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 20px;
         }
 
+        .brand-logo-container {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 12px auto;
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
         .brand-logo {
-            width: 64px;
-            height: 64px;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            margin-bottom: 12px;
-            border-radius: 12px;
+            padding: 6px;
         }
 
         .brand-header h1 {
-            font-size: 2.2rem;
+            font-family: 'Poppins', sans-serif;
             font-weight: 800;
+            font-size: 2.2rem;
             letter-spacing: 1px;
             color: #ffffff;
             margin-bottom: 6px;
@@ -90,33 +110,39 @@
         .brand-header p {
             color: var(--text-muted);
             font-size: 0.95rem;
+            font-weight: 500;
         }
 
         /* Form Sections & Cards */
         .section-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 20px;
         }
 
         .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
             color: #ffffff;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
         }
 
         .section-title span.badge {
             background: var(--accent-red);
             color: white;
-            font-size: 0.75rem;
-            padding: 2px 8px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
             border-radius: 999px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .form-grid {
@@ -130,12 +156,19 @@
                 grid-template-columns: 1fr;
             }
             .portal-container {
-                padding: 20px;
+                padding: 16px;
+                border-radius: 12px;
+            }
+            .brand-header h1 {
+                font-size: 1.8rem;
+            }
+            input[type="text"], input[type="tel"], input[type="email"] {
+                font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
             }
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .form-group.full-width {
@@ -144,51 +177,58 @@
 
         label {
             display: block;
-            font-size: 0.8rem;
-            font-weight: 700;
+            font-size: 0.75rem;
+            font-weight: 800;
             margin-bottom: 6px;
             color: #cbd5e1;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
 
         input[type="text"], input[type="tel"], input[type="email"] {
             width: 100%;
             padding: 12px 14px;
-            background: rgba(10, 14, 23, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 8px;
+            background: rgba(10, 14, 23, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
             color: #fff;
             font-size: 0.95rem;
+            font-weight: 500;
             outline: none;
             transition: all 0.2s;
         }
 
         input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus {
             border-color: var(--accent-red);
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
         }
 
         /* Dropzones */
         .dropzone {
-            border: 2px dashed rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            padding: 24px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 22px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            background: rgba(10, 14, 23, 0.4);
+            background: rgba(10, 14, 23, 0.5);
         }
 
         .dropzone:hover, .dropzone.dragover {
             border-color: var(--accent-red);
-            background: rgba(220, 38, 38, 0.04);
+            background: rgba(220, 38, 38, 0.06);
         }
 
         .dropzone p {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+            font-weight: 500;
             margin-top: 8px;
+        }
+
+        .dropzone p strong {
+            color: #f1f5f9;
+            font-weight: 700;
         }
 
         .dropzone input[type="file"] {
@@ -209,10 +249,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 8px 12px;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 8px;
             font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
         .file-info {
@@ -226,12 +267,13 @@
 
         .file-name {
             color: #f1f5f9;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .file-meta {
             color: var(--text-muted);
             font-size: 0.75rem;
+            font-weight: 500;
         }
 
         .remove-file {
@@ -239,22 +281,23 @@
             border: none;
             color: var(--error);
             cursor: pointer;
-            font-size: 1rem;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-size: 1.2rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
         }
 
         .remove-file:hover {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.15);
         }
 
         /* Summary / Pricing Card */
         .summary-card {
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(15, 23, 42, 0.8));
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            border-radius: 14px;
             padding: 20px;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .summary-row {
@@ -262,34 +305,52 @@
             justify-content: space-between;
             margin-bottom: 8px;
             font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .summary-row span:first-child {
+            color: var(--text-muted);
+        }
+
+        .summary-row span:last-child {
+            font-weight: 700;
+            color: #f1f5f9;
         }
 
         .summary-row.total {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
             margin-top: 12px;
             padding-top: 12px;
             font-size: 1.1rem;
+        }
+
+        .summary-row.total span:first-child {
+            font-family: 'Poppins', sans-serif;
             font-weight: 700;
             color: #ffffff;
         }
 
         .summary-row.total span:last-child {
             color: #4ade80;
+            font-size: 1.25rem;
+            font-weight: 800;
         }
 
         /* Action Buttons */
         .btn-primary {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: var(--accent-red);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
+            font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.45);
         }
 
         .btn-primary:hover {
@@ -332,7 +393,7 @@
             margin-top: 16px;
             text-align: center;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .success-msg { color: var(--success); }
@@ -343,10 +404,11 @@
 <body>
 
     <div class="portal-container">
-        <!-- Branding Header with Logo -->
+        <!-- Branding Header with Logo Placeholder -->
         <div class="brand-header">
-            <!-- Replace 'logo.png' with your logo file name or URL -->
-            <img src="logo.png" alt="RML Logo" class="brand-logo" onerror="this.style.display='none'">
+            <div class="brand-logo-container">
+                <img src="RMLC.png" alt="RMLC Logo" class="brand-logo" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23dc2626\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z\'/><polyline points=\'14 2 14 8 20 8\'/></svg>';">
+            </div>
             <h1>RML <span>CREATION</span></h1>
             <p>Professional Document Printing, Scanning & File Service Portal</p>
         </div>
@@ -354,26 +416,32 @@
         <form id="uploadPortalForm">
             <!-- Client Information -->
             <div class="section-card">
-                <div class="section-title">Client Information <span class="badge">Required</span></div>
+                <div class="section-title">
+                    Client Information 
+                    <span class="badge">Required</span>
+                </div>
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="clientName">NAME *</label>
+                        <label for="clientName">Name *</label>
                         <input type="text" id="clientName" required placeholder="Enter full name">
                     </div>
                     <div class="form-group">
                         <label for="clientContact">Contact Number / Email (Optional)</label>
-                        <input type="text" id="clientContact" placeholder="e.g., 09123456789 or xyz@gmail.com.com">
+                        <input type="text" id="clientContact" placeholder="e.g., 09123456789 or email@domain.com">
                     </div>
                 </div>
             </div>
 
             <!-- Image Upload Section -->
             <div class="section-card">
-                <div class="section-title">A. Image Upload <span class="badge">Optional</span></div>
+                <div class="section-title">
+                    A. Image Upload 
+                    <span class="badge" style="background: rgba(255,255,255,0.1); color: #94a3b8;">Optional</span>
+                </div>
                 <div class="dropzone" id="imageDropzone">
                     <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color: var(--accent-red); margin: 0 auto;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                    <p><strong>Drag & drop images here</strong> or click to browse</p>
-                    <p style="font-size: 0.75rem; margin-top: 4px;">Supports JPG, JPEG, PNG, WEBP (Max 50MB per file)</p>
+                    <p><strong>Tap or drag & drop images here</strong></p>
+                    <p style="font-size: 0.75rem; margin-top: 4px; color: var(--text-muted);">Supports JPG, JPEG, PNG, WEBP (Max 50MB per file)</p>
                     <input type="file" id="imageInput" multiple accept="image/jpeg,image/png,image/webp,image/jpg">
                 </div>
                 <div class="file-list" id="imageList"></div>
@@ -381,11 +449,14 @@
 
             <!-- Document Upload Section -->
             <div class="section-card">
-                <div class="section-title">B. Document & File Upload <span class="badge">PDF / Office / Zip</span></div>
+                <div class="section-title">
+                    B. Document & File Upload 
+                    <span class="badge" style="background: rgba(255,255,255,0.1); color: #94a3b8;">PDF / Office / Zip</span>
+                </div>
                 <div class="dropzone" id="docDropzone">
                     <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color: var(--accent-red); margin: 0 auto;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
-                    <p><strong>Drag & drop documents here</strong> or click to browse</p>
-                    <p style="font-size: 0.75rem; margin-top: 4px;">Supports PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, ZIP (Max 50MB)</p>
+                    <p><strong>Tap or drag & drop documents here</strong></p>
+                    <p style="font-size: 0.75rem; margin-top: 4px; color: var(--text-muted);">Supports PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, ZIP (Max 50MB)</p>
                     <input type="file" id="docInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
                 </div>
                 <div class="file-list" id="docList"></div>
@@ -423,7 +494,7 @@
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progressBarFill"></div>
                 </div>
-                <p id="progressText" style="font-size: 0.8rem; text-align: center; color: var(--text-muted);">Preparing files...</p>
+                <p id="progressText" style="font-size: 0.8rem; text-align: center; color: var(--text-muted); font-weight: 500;">Preparing files...</p>
             </div>
 
             <div id="statusMessage"></div>
@@ -488,14 +559,12 @@
                     selectedImages.push(file);
                 } else {
                     selectedDocs.push(file);
-                    // Check file format and compute page counts dynamically
                     const fileName = file.name.toLowerCase();
                     if (fileName.endsWith('.pdf')) {
                         await countPdfPages(file);
                     } else if (fileName.endsWith('.docx')) {
                         await countDocxPages(file);
                     } else {
-                        // Default fallback for other file formats (e.g. txt, xlsx) = 1 page minimum
                         totalPageCount += 1;
                     }
                 }
@@ -525,7 +594,6 @@
                 
                 let docPages = 0;
 
-                // Method 1: Read saved MS Word metadata from docProps/app.xml
                 if (zipContent.files["docProps/app.xml"]) {
                     const appXmlText = await zipContent.files["docProps/app.xml"].async("text");
                     const parser = new DOMParser();
@@ -536,7 +604,6 @@
                     }
                 }
 
-                // Method 2: Fallback estimation via word count if metadata is missing (~250 words per page)
                 if (docPages <= 0 && zipContent.files["word/document.xml"]) {
                     const docXmlText = await zipContent.files["word/document.xml"].async("text");
                     const parser = new DOMParser();
@@ -546,7 +613,7 @@
                     docPages = Math.max(1, Math.ceil(wordCount / 250));
                 }
 
-                if (docPages <= 0) docPages = 1; // Absolute minimum fallback
+                if (docPages <= 0) docPages = 1;
 
                 file._calculatedPages = docPages;
                 totalPageCount += docPages;
@@ -558,13 +625,11 @@
         }
 
         function renderFileList() {
-            // Render Images
             imageList.innerHTML = '';
             selectedImages.forEach((file, index) => {
                 imageList.appendChild(createFileItemElement(file, index, 'image'));
             });
 
-            // Render Docs
             docList.innerHTML = '';
             selectedDocs.forEach((file, index) => {
                 docList.appendChild(createFileItemElement(file, index, 'doc'));
@@ -676,10 +741,10 @@
                 progressBarFill.style.width = "90%";
                 const result = await response.json();
 
-                    if (result.status === 'success') {
+                if (result.status === 'success') {
                     progressBarFill.style.width = "100%";
                     statusMessage.className = "success-msg";
-                    statusMessage.textContent = `Transaction's successful! ${allFiles.length} file(s) Please pay the amount upon receiving. Total Estimated Price: ₱${(totalPageCount * 2.00).toFixed(2)}`;
+                    statusMessage.textContent = `Transaction successful! ${allFiles.length} file(s) uploaded. Please pay the amount upon receiving. Total: ₱${(totalPageCount * 2.00).toFixed(2)}`;
                     
                     document.getElementById('uploadPortalForm').reset();
                     selectedImages = [];
